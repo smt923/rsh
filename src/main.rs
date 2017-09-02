@@ -3,7 +3,7 @@ use std::env;
 use std::io;
 use std::io::Write;
 
-mod builtins;
+mod util;
 
 fn eval(input: &str, history: &mut VecDeque<String>) -> bool {
     let mut args = input.trim().split_whitespace();
@@ -16,11 +16,11 @@ fn eval(input: &str, history: &mut VecDeque<String>) -> bool {
         }
         match command {
             "exit" => return true,
-            "history" => builtins::history(history, &other_args),
-            "pwd" => builtins::pwd(&other_args),
-            "ls" => builtins::ls(&other_args),
-            "cd" => builtins::cd(&other_args),
-            _ => builtins::cmd(command, &other_args),
+            "history" => util::history(history, &other_args),
+            "pwd" => util::pwd(&other_args),
+            "ls" => util::ls(&other_args),
+            "cd" => util::cd(&other_args),
+            _ => util::cmd(command, &other_args),
         }
     }
 
