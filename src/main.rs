@@ -1,7 +1,11 @@
+extern crate ansi_term;
+
 use std::collections::VecDeque;
 use std::env;
 use std::io;
 use std::io::Write;
+
+use ansi_term::Color::Cyan;
 
 mod util;
 
@@ -28,10 +32,20 @@ fn eval(input: &str, history: &mut VecDeque<String>) -> bool {
 }
 
 fn main() {
+    if cfg!(windows) {
+        if let Err(code) = ansi_term::enable_ansi_support() {
+            println!(
+                "Error: Could not enable ANSI terminal colors under windows: {}",
+                code
+            );
+            std::process::exit(1)
+        };
+    }
+
     let mut history: VecDeque<String> = VecDeque::with_capacity(100);
     loop {
         if let Some(name) = env::current_dir().unwrap().file_name() {
-            print!("{} ~ $ ", name.to_str().unwrap_or("UNKNOWN"));
+            print!("{} ~ $ ", Cyan.paint(name.to_str().unwrap_or("UNKNOWN")));
         } else {
             print!("$ ");
         };
