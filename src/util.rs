@@ -70,7 +70,6 @@ pub fn history(hist: &mut VecDeque<String>, args: &Vec<&str>) {
 		1 => match args[0] {
 			"-c" => {
 				hist.clear();
-				println!("History has been cleared!")
 			}
 			_ => (),
 		},
