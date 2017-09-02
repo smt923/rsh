@@ -40,9 +40,9 @@ pub fn ls(args: &Vec<&str>) {
 			{
 				if let Ok(e) = e {
 					if e.metadata().unwrap().is_dir() {
-						print!("\\{} ", e.file_name().to_str().unwrap_or(""));
+						print!("\\{} ", Blue.paint(e.file_name().to_str().unwrap_or("")));
 					} else {
-						print!("{} ", e.file_name().to_str().unwrap_or(""));
+						print!("{} ", Green.paint(e.file_name().to_str().unwrap_or("")));
 					}
 				}
 			}
