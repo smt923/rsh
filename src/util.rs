@@ -1,9 +1,63 @@
+extern crate chrono;
+
 use std::collections::VecDeque;
 use std::env;
 use std::path::Path;
 use std::process::Command;
+use std::io::Error;
+use std::fs::DirEntry;
 
-use ansi_term::Color::{Blue, Green};
+use self::chrono::offset::Utc;
+use self::chrono::DateTime;
+
+use ansi_term::Color::{Blue, Cyan, Green};
+
+#[inline]
+fn fileprint(f: Result<DirEntry, Error>) {
+	if let Ok(f) = f {
+		if let Ok(meta) = f.metadata() {
+			if meta.is_dir() {
+				print!("\\{} ", Blue.paint(f.file_name().to_str().unwrap_or("")),);
+			} else if meta.file_type().is_symlink() {
+				print!("{} ", Cyan.paint(f.file_name().to_str().unwrap_or("")),);
+			} else {
+				print!("{} ", Green.paint(f.file_name().to_str().unwrap_or("")),);
+			}
+		}
+	}
+}
+
+#[inline]
+fn fileprintl(f: Result<DirEntry, Error>) {
+	if let Ok(f) = f {
+		if let Ok(meta) = f.metadata() {
+			let fsize = meta.len();
+			let fmod: DateTime<Utc> = meta.modified().unwrap().into();
+			if meta.is_dir() {
+				println!(
+					"{: >8} {: >6} - \\{: >6} ",
+					fsize,
+					fmod.format("%b %m %R"),
+					Blue.paint(f.file_name().to_str().unwrap_or("")),
+				);
+			} else if meta.file_type().is_symlink() {
+				println!(
+					"{: >8} {: >6} - {: >6} ",
+					fsize,
+					fmod.format("%b %m %R"),
+					Cyan.paint(f.file_name().to_str().unwrap_or("")),
+				);
+			} else {
+				println!(
+					"{: >8} {: >6} - {: >6} ",
+					fsize,
+					fmod.format("%b %m %R"),
+					Green.paint(f.file_name().to_str().unwrap_or("")),
+				);
+			}
+		}
+	}
+}
 
 pub fn pwd(args: &Vec<&str>) {
 	match args.len() {
@@ -21,33 +75,42 @@ pub fn ls(args: &Vec<&str>) {
 				.read_dir()
 				.expect("could not read path")
 			{
-				if let Ok(e) = e {
-					if e.metadata().unwrap().is_dir() {
-						print!("\\{} ", Blue.paint(e.file_name().to_str().unwrap_or("")));
-					} else {
-						print!("{} ", Green.paint(e.file_name().to_str().unwrap_or("")));
-					}
-				}
+				fileprint(e);
 			}
 			print!("\n");
 		}
-		1 => {
+		1 => if args[0] == "-l" {
+			for e in env::current_dir()
+				.unwrap()
+				.read_dir()
+				.expect("could not read path")
+			{
+				fileprintl(e);
+			}
+		} else {
 			let path = Path::new(args[0]);
 			for e in path.canonicalize()
 				.unwrap()
 				.read_dir()
 				.expect("could not read path")
 			{
-				if let Ok(e) = e {
-					if e.metadata().unwrap().is_dir() {
-						print!("\\{} ", Blue.paint(e.file_name().to_str().unwrap_or("")));
-					} else {
-						print!("{} ", Green.paint(e.file_name().to_str().unwrap_or("")));
-					}
-				}
+				fileprint(e);
 			}
 			print!("\n");
-		}
+		},
+		2 => match args[0] {
+			"-l" => {
+				let path = Path::new(args[1]);
+				for e in path.canonicalize()
+					.unwrap()
+					.read_dir()
+					.expect("could not read path")
+				{
+					fileprintl(e);
+				}
+			}
+			_ => println!("Error: usage: ls <args> <path>"),
+		},
 		_ => (),
 	}
 }

@@ -5,3 +5,4 @@ authors = ["smt923 <smtea923@gmail.com>"]
 
 [dependencies]
 ansi_term = { git = "https://github.com/ogham/rust-ansi-term", rev = "dee04cbc9745f33be155a23d09e43d0508d5cc52" }
+chrono = "0.4.0"
